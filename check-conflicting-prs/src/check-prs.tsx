@@ -1,6 +1,8 @@
+import {Detail} from "@raycast/api";
 import {PRList} from "./Components/pr-list";
 
-export default function Command() {
+const items = ["Item #1", "Item #2", "Item #3"];
 
-    return PRList();
+export default function Command() {
+    return PRList(items);
 }
