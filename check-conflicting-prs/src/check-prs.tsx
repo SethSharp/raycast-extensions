@@ -2,6 +2,9 @@ import {PRList} from "./Components/pr-list";
 import { ActionPanel, Form, Action } from "@raycast/api";
 import {useState} from "react";
 import axios from "axios";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 let items:any;
 
@@ -20,7 +23,7 @@ export default function Command() {
 
     async function makeGraphQlRequest(form: MyForm) {
         const query = `{
-                      search(query: "is:open is:pr author:SethSharp org:codinglabsau", type: ISSUE, first: 100) {
+                      search(query: "is:open is:pr author:${form.author} org:${form.organisation}", type: ISSUE, first: 100) {
                         issueCount
                         edges {
                           node {
@@ -41,7 +44,7 @@ export default function Command() {
             { query },
             {
                 headers: {
-                    Authorization: `Bearer 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`,
+                    Authorization: `Bearer ${form.token}`,
                     'Content-Type': 'application/json',
                 },
             }
@@ -68,6 +71,7 @@ export default function Command() {
 
     function submitForm(form: MyForm) {
         // make request
+        console.log(process.env.TOKEN);
         if (form.author == '') {
             setAuthorError('Name is required');
             return;
@@ -91,7 +95,6 @@ export default function Command() {
     }
 
     if (submitted) {
-        console.log(items);
         return PRList(items);
     }
 
@@ -105,20 +108,19 @@ export default function Command() {
         >
             <Form.TextField
                 id="author"
-                placeholder="James"
+                defaultValue="SethSharp"
                 error={authorError}
                 onChange={dropAuthorErrorIfNeeded}
             />
             <Form.TextField
                 id="organisation"
-                placeholder="codinglabsau"
                 defaultValue="codinglabsau"
                 error={organisationError}
                 onChange={dropOrganisationErrorIfNeeded}
             />
             <Form.TextField
                 id="token"
-                placeholder="secret..."
+                defaultValue={process.env.TOKEN}
                 error={tokenError}
                 onChange={dropTokenErrorIfNeeded}
             />
