@@ -14,12 +14,6 @@ interface MyForm {
 
 export default function Command() {
 
-    let myForm: MyForm = {
-        author: '',
-        organisation: '',
-        token: '',
-    };
-
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
@@ -28,9 +22,6 @@ export default function Command() {
 
     function submitForm(form: MyForm) {
         // make request
-        console.log(myForm);
-        myForm.author = form.author;
-
         if (form.author == '') {
             setAuthorError('Name is required');
             return;
