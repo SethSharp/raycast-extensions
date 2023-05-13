@@ -1,10 +1,9 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import {PRList} from "./Components/pr-list";
 import { ActionPanel, Form, Action } from "@raycast/api";
 import {useState} from "react";
 import axios from "axios";
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 let items:any;
 
@@ -71,7 +70,6 @@ export default function Command() {
 
     function submitForm(form: MyForm) {
         // make request
-        console.log(process.env.TOKEN);
         if (form.author == '') {
             setAuthorError('Name is required');
             return;
@@ -120,7 +118,7 @@ export default function Command() {
             />
             <Form.TextField
                 id="token"
-                defaultValue={process.env.TOKEN}
+                defaultValue={process.env.REACT_APP_NPM_TOKEN}
                 error={tokenError}
                 onChange={dropTokenErrorIfNeeded}
             />
