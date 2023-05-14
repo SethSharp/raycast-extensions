@@ -1,12 +1,12 @@
 import { List } from "@raycast/api";
 
-export function PRList(data: Array<string>) {
+export function PRList(data: [any]) {
     return (
         <List isShowingDetail>
             {data.map((item) => (
                 <List.Item
-                    title={"PR title: " + item}
-                    key={item}
+                    title={item.node.title}
+                    key={item.node.number}
                     detail={
                         <List.Item.Detail
                             metadata={

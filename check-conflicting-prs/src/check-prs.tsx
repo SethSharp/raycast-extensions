@@ -1,10 +1,11 @@
-import {Detail} from "@raycast/api";
+import dotenv from 'dotenv';
+dotenv.config();
 import {PRList} from "./Components/pr-list";
 import { ActionPanel, Form, Action } from "@raycast/api";
 import {useState} from "react";
+import axios from "axios";
 
-const items = ["Item #1", "Item #2", "Item #3"];
-
+let items:any;
 
 interface MyForm {
     author: string,
@@ -13,12 +14,59 @@ interface MyForm {
 }
 
 export default function Command() {
-
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
 
     const [submitted, setSubmitted] = useState(false);
+
+    async function makeGraphQlRequest(form: MyForm) {
+        const query = `{
+                      search(query: "is:open is:pr author:${form.author} org:${form.organisation}", type: ISSUE, first: 100) {
+                        issueCount
+                        edges {
+                          node {
+                            ... on PullRequest {
+                              number
+                              title
+                              url
+                              mergeable
+                            }
+                          }
+                        }
+                      }
+                    }
+                    `;
+
+        return axios.post(
+            'https://api.github.com/graphql',
+            { query },
+            {
+                headers: {
+                    Authorization: `Bearer ${form.token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+    }
+
+    function dropAuthorErrorIfNeeded() {
+        if (authorError && authorError.length > 0) {
+            setAuthorError(undefined);
+        }
+    }
+
+    function dropOrganisationErrorIfNeeded() {
+        if (organisationError && organisationError.length > 0) {
+            setOrganisationError(undefined);
+        }
+    }
+
+    function dropTokenErrorIfNeeded() {
+        if (tokenError && tokenError.length > 0) {
+            setTokenError(undefined);
+        }
+    }
 
     function submitForm(form: MyForm) {
         // make request
@@ -38,7 +86,10 @@ export default function Command() {
         }
 
         // if doesn't fail
-        setSubmitted(true);
+        makeGraphQlRequest(form).then(res => {
+            items = res.data.data.search.edges;
+            setSubmitted(true);
+        })
     }
 
     if (submitted) {
@@ -53,9 +104,24 @@ export default function Command() {
                 </ActionPanel>
             }
         >
-            <Form.TextField id="author" placeholder="James" error={authorError}/>
-            <Form.TextField id="organisation" placeholder="codinglabsau" defaultValue="codinglabsau" error={organisationError}/>
-            <Form.TextField id="token" placeholder="secret..." error={tokenError}/>
+            <Form.TextField
+                id="author"
+                defaultValue="SethSharp"
+                error={authorError}
+                onChange={dropAuthorErrorIfNeeded}
+            />
+            <Form.TextField
+                id="organisation"
+                defaultValue="codinglabsau"
+                error={organisationError}
+                onChange={dropOrganisationErrorIfNeeded}
+            />
+            <Form.TextField
+                id="token"
+                defaultValue={process.env.REACT_APP_NPM_TOKEN}
+                error={tokenError}
+                onChange={dropTokenErrorIfNeeded}
+            />
         </Form>
     );
 }
