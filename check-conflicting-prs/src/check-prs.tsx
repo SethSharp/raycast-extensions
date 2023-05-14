@@ -31,6 +31,9 @@ export default function Command() {
                               title
                               url
                               mergeable
+                              state
+                              createdAt
+                              updatedAt
                             }
                           }
                         }
@@ -118,7 +121,7 @@ export default function Command() {
             />
             <Form.TextField
                 id="token"
-                defaultValue={process.env.REACT_APP_NPM_TOKEN}
+                defaultValue="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"
                 error={tokenError}
                 onChange={dropTokenErrorIfNeeded}
             />
