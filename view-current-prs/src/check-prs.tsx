@@ -1,7 +1,5 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import {PRList} from "./Components/pr-list";
-import { ActionPanel, Form, Action } from "@raycast/api";
+import { ActionPanel, Form, Action, Cache } from "@raycast/api";
 import {useState} from "react";
 import axios from "axios";
 
@@ -14,11 +12,32 @@ interface MyForm {
 }
 
 export default function Command() {
+
+    const myForm: MyForm = {
+        author: '',
+        organisation: '',
+        token: ''
+    }
+
+    const cached = new Cache().get("form");
+
+    if (cached) {
+        const data = JSON.parse(cached)[0];
+        myForm.author = data.author
+        myForm.organisation = data.organisation
+        myForm.token = data.token
+        submitForm(myForm);
+    }
+
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
 
     const [submitted, setSubmitted] = useState(false);
+
+    function cacheForm(form: MyForm) {
+        new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token }]));
+    }
 
     async function makeGraphQlRequest(form: MyForm) {
         const query = `{
@@ -38,8 +57,7 @@ export default function Command() {
                           }
                         }
                       }
-                    }
-                    `;
+                    }`;
 
         return axios.post(
             'https://api.github.com/graphql',
@@ -92,6 +110,7 @@ export default function Command() {
         makeGraphQlRequest(form).then(res => {
             items = res.data.data.search.edges;
             setSubmitted(true);
+            cacheForm(form);
         })
     }
 
@@ -109,19 +128,19 @@ export default function Command() {
         >
             <Form.TextField
                 id="author"
-                defaultValue="SethSharp"
+                defaultValue={myForm.author}
                 error={authorError}
                 onChange={dropAuthorErrorIfNeeded}
             />
             <Form.TextField
                 id="organisation"
-                defaultValue="codinglabsau"
+                defaultValue={myForm.organisation}
                 error={organisationError}
                 onChange={dropOrganisationErrorIfNeeded}
             />
             <Form.TextField
                 id="token"
-                defaultValue="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"
+                defaultValue={myForm.token}
                 error={tokenError}
                 onChange={dropTokenErrorIfNeeded}
             />
