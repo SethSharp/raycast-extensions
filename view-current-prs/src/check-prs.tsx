@@ -31,8 +31,6 @@ export default function Command() {
         myForm.author = data.author
         myForm.organisation = data.organisation
         myForm.token = data.token
-
-        myForm.token = "123"
     }
 
     const [authorError, setAuthorError] = useState<string | undefined>();
