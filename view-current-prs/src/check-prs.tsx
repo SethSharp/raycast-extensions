@@ -15,8 +15,35 @@ function cacheForm(form: MyForm) {
     new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token }]));
 }
 
-async function makeGraphQlRequest(form: MyForm) {
-    const query = `{
+export default function Command() {
+
+    const myForm: MyForm = {
+        author: '',
+        organisation: '',
+        token: ''
+    }
+
+    const cached = new Cache().get("form");
+
+    if (cached) {
+
+        const data = JSON.parse(cached)[0];
+        myForm.author = data.author
+        myForm.organisation = data.organisation
+        myForm.token = data.token
+
+        myForm.token = "123"
+    }
+
+    const [authorError, setAuthorError] = useState<string | undefined>();
+    const [organisationError, setOrganisationError] = useState<string | undefined>();
+    const [tokenError, setTokenError] = useState<string | undefined>();
+
+    const [submitted, setSubmitted] = useState(false);
+
+    async function makeGraphQlRequest(form: MyForm) {
+
+        const query = `{
                       search(query: "is:open is:pr author:${form.author} org:${form.organisation}", type: ISSUE, first: 100) {
                         issueCount
                         edges {
@@ -35,42 +62,31 @@ async function makeGraphQlRequest(form: MyForm) {
                       }
                     }`;
 
-    return axios.post(
-        'https://api.github.com/graphql',
-        { query },
-        {
-            headers: {
-                Authorization: `Bearer ${form.token}`,
-                'Content-Type': 'application/json',
-            },
+        try {
+
+            await axios.post(
+                'https://api.github.com/graphql',
+                { query },
+                {
+                    headers: {
+                        Authorization: `Bearer ${form.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            ).then(res => {
+                items = res.data.data.search.edges;
+                setSubmitted(true);
+                cacheForm(form);
+            });
+        } catch (error: Error) {
+
+            showToast({
+                style: Toast.Style.Failure,
+                title: "Failure with GitHub Request -> Check your details before submitting again",
+                message: error.message,
+            });
         }
-    );
-}
-
-export default function Command() {
-
-    const myForm: MyForm = {
-        author: '',
-        organisation: '',
-        token: ''
     }
-
-    const cached = new Cache().get("form");
-
-    if (cached) {
-        const data = JSON.parse(cached)[0];
-        myForm.author = data.author
-        myForm.organisation = data.organisation
-        myForm.token = data.token
-
-        // myForm.token = "123"
-    }
-
-    const [authorError, setAuthorError] = useState<string | undefined>();
-    const [organisationError, setOrganisationError] = useState<string | undefined>();
-    const [tokenError, setTokenError] = useState<string | undefined>();
-
-    const [submitted, setSubmitted] = useState(false);
 
     function dropAuthorErrorIfNeeded() {
         if (authorError && authorError.length > 0) {
@@ -107,20 +123,7 @@ export default function Command() {
             return;
         }
 
-        // if doesn't fail
-        try {
-            makeGraphQlRequest(form).then(res => {
-                items = res.data.data.search.edges;
-                setSubmitted(true);
-                cacheForm(form);
-            })
-        } catch (error) {
-            showToast({
-                style: Toast.Style.Failure,
-                title: "Failure with GitHub Request",
-                message: error.message,
-            });
-        }
+        makeGraphQlRequest(form);
     }
 
     if (submitted) {
