@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 
 export function PRList(data: [any]) {
 
@@ -10,7 +10,9 @@ export function PRList(data: [any]) {
     }
 
     return (
-        <List isShowingDetail>
+        <List isShowingDetail
+
+            >
             {data.map((item) => (
                 <List.Item
                     title={item.node.title.substring(item.node.title.indexOf('/') + 1)}
@@ -26,12 +28,18 @@ export function PRList(data: [any]) {
                                     <List.Item.Detail.Metadata.Label title="Last Updated" text={convertDate(item.node.updatedAt)} />
                                     <List.Item.Detail.Metadata.Separator />
                                     <List.Item.Detail.Metadata.Label title="Checks"/>
-                                    <List.Item.Detail.Metadata.Label title="Conflicts" text={item.node.mergeable == 'CONFLICTS' ? 'Changes required' : item.node.mergeable == 'UNKOWN' ? 'other issue' : 'All g'}/>
+                                    <List.Item.Detail.Metadata.Label title="Conflicts" text={item.node.mergeable === "CONFLICTING" ? 'Conflicts with merging' : 'No Conflicts'}/>
                                     <List.Item.Detail.Metadata.Link title="URL" text="Link" target={item.node.url} />
                                     <List.Item.Detail.Metadata.Separator />
                                 </List.Item.Detail.Metadata>
                             }
                         />
+                    }
+                    actions={
+                        <ActionPanel title="#1 in raycast/extensions">
+                            <Action.OpenInBrowser url={item.node.url} />
+                            <Action.CopyToClipboard title="Copy Pull Request Title" content={item.node.title} />
+                        </ActionPanel>
                     }
                 />
             ))}
