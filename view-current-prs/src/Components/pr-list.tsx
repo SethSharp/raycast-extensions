@@ -36,7 +36,7 @@ export function PRList(data: [any]) {
                         />
                     }
                     actions={
-                        <ActionPanel title="#1 in raycast/extensions">
+                        <ActionPanel title="Actions to perform">
                             <Action.OpenInBrowser url={item.node.url} />
                             <Action.CopyToClipboard title="Copy Pull Request Title" content={item.node.title} />
                         </ActionPanel>
