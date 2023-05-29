@@ -10,9 +10,7 @@ export function PRList(data: [any]) {
     }
 
     return (
-        <List isShowingDetail
-
-            >
+        <List isShowingDetail>
             {data.map((item) => (
                 <List.Item
                     title={item.node.title.substring(item.node.title.indexOf('/') + 1)}
@@ -23,7 +21,6 @@ export function PRList(data: [any]) {
                                 <List.Item.Detail.Metadata>
                                     <List.Item.Detail.Metadata.Label title="Basic Information" />
                                     <List.Item.Detail.Metadata.Label title="Title" text={item.node.title} />
-                                    <List.Item.Detail.Metadata.Label title="State" text={item.node.state} />
                                     <List.Item.Detail.Metadata.Label title="Created" text={convertDate(item.node.createdAt)} />
                                     <List.Item.Detail.Metadata.Label title="Last Updated" text={convertDate(item.node.updatedAt)} />
                                     <List.Item.Detail.Metadata.Separator />
