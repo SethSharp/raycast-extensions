@@ -36,11 +36,10 @@ export default function Command() {
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
-
     const [submitted, setSubmitted] = useState(false);
 
     async function makeGraphQlRequest(form: MyForm) {
-
+        
         const query = `{
                       search(query: "is:open is:pr author:${form.author} org:${form.organisation}", type: ISSUE, first: 100) {
                         issueCount
@@ -60,30 +59,16 @@ export default function Command() {
                       }
                     }`;
 
-        try {
-
-            await axios.post(
-                'https://api.github.com/graphql',
-                { query },
-                {
-                    headers: {
-                        Authorization: `Bearer ${form.token}`,
-                        'Content-Type': 'application/json',
-                    },
-                }
-            ).then(res => {
-                items = res.data.data.search.edges;
-                setSubmitted(true);
-                cacheForm(form);
-            });
-        } catch (error: Error) {
-
-            showToast({
-                style: Toast.Style.Failure,
-                title: "Failure with GitHub Request -> Check your details before submitting again",
-                message: error.message,
-            });
-        }
+        return await axios.post(
+            'https://api.github.com/graphql',
+            { query },
+            {
+                headers: {
+                    Authorization: `Bearer ${form.token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
     }
 
     function dropAuthorErrorIfNeeded() {
@@ -105,7 +90,7 @@ export default function Command() {
     }
 
     function submitForm(form: MyForm) {
-        // make request
+
         if (form.author == '') {
             setAuthorError('Name is required');
             return;
@@ -121,7 +106,19 @@ export default function Command() {
             return;
         }
 
-        makeGraphQlRequest(form);
+        makeGraphQlRequest(form).then(res => {
+            if (res) {
+                items = res.data.data.search.edges;
+                setSubmitted(true);
+                cacheForm(form);
+            }
+        }).catch(err => {
+            showToast({
+                style: Toast.Style.Failure,
+                title: "Failure with GitHub Request -> Check your details before submitting again",
+                message: err,
+            });
+        });
     }
 
     if (submitted) {
