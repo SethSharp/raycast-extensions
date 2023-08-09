@@ -41,7 +41,7 @@ export default function Command() {
               search(
                 query: "${form.state} is:pr author:${form.author} org:${form.organisation}", 
                 type: ISSUE, 
-                first: ${ form.count }
+                first: ${form.count}
               ) {
                 issueCount
                 edges {
@@ -255,7 +255,6 @@ export default function Command() {
                 error={countError}
                 defaultValue="10"
                 onChange={dropCountErrorIfNeeded}
-
             />
         </Form>
     );
