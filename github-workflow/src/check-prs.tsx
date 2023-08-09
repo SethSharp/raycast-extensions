@@ -11,10 +11,6 @@ interface MyForm {
     token: string,
 }
 
-function cacheForm(form: MyForm) {
-    new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token }]));
-}
-
 export default function Command() {
 
     const myForm: MyForm = {
@@ -23,23 +19,13 @@ export default function Command() {
         token: ''
     }
 
-    const cached = new Cache().get("form");
-
-    if (cached) {
-
-        const data = JSON.parse(cached)[0];
-        myForm.author = data.author
-        myForm.organisation = data.organisation
-        myForm.token = data.token
-    }
-
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
     const [submitted, setSubmitted] = useState(false);
 
     async function makeGraphQlRequest(form: MyForm) {
-        
+
         const query = `{
                       search(query: "is:open is:pr author:${form.author} org:${form.organisation}", type: ISSUE, first: 100) {
                         issueCount
@@ -89,6 +75,20 @@ export default function Command() {
         }
     }
 
+    function cacheForm(form: MyForm) {
+        new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token }]));
+    }
+
+    function checkFormCache() {
+        let cached = new Cache().get("form");
+        if (cached) {
+            const data = JSON.parse(cached)[0];
+            myForm.author = data.author
+            myForm.organisation = data.organisation
+            myForm.token = data.token
+        }
+    }
+
     function submitForm(form: MyForm) {
 
         if (form.author == '') {
@@ -124,6 +124,9 @@ export default function Command() {
     if (submitted) {
         return PRList(items);
     }
+
+    // OnMounted/render
+    checkFormCache()
 
     return (
         <Form
