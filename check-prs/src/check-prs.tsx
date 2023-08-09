@@ -10,6 +10,7 @@ interface MyForm {
     organisation: string,
     token: string,
     state: string,
+    conflicts: string
 }
 
 export default function Command() {
@@ -18,7 +19,8 @@ export default function Command() {
         author: '',
         organisation: '',
         token: '',
-        state: ''
+        state: 'is:open',
+        conflicts: '0',
     }
 
     const [authorError, setAuthorError] = useState<string | undefined>();
@@ -34,7 +36,7 @@ export default function Command() {
               search(
                 query: "${form.state} is:pr author:${form.author} org:${form.organisation}", 
                 type: ISSUE, 
-                first: 100
+                first: 20
               ) {
                 issueCount
                 edges {
@@ -117,6 +119,17 @@ export default function Command() {
         makeGraphQlRequest(form).then(res => {
             if (res) {
                 items = res.data.data.search.edges;
+
+                if (form.conflicts == '1') {
+                    items = items.filter(
+                        (pr: any) => pr.node.mergeable === 'MERGEABLE'
+                    );
+                } else if (form.conflicts == '2') {
+                    items = items.filter(
+                        (pr: any) => pr.node.mergeable === 'CONFLICTING'
+                    );
+                }
+
                 setSubmitted(true);
                 cacheForm(form);
             }
@@ -177,6 +190,15 @@ export default function Command() {
                 <Form.DropdownItem value="is:open" title="Open PRs" icon="🟢"/>
                 <Form.DropdownItem value="is:merged" title="Merged PRs" icon="🟣"/>
                 <Form.DropdownItem value="is:closed" title="Closed PRs" icon="🔴"/>
+            </Form.Dropdown>
+            <Form.Dropdown
+                id="conflicts"
+                title="Has conflicts"
+                defaultValue={myForm.conflicts}
+            >
+                <Form.DropdownItem value="0" title="All PRs" icon="⚪️"/>
+                <Form.DropdownItem value="1" title="Non Conflicting" icon="🟢"/>
+                <Form.DropdownItem value="2" title="Conflicting" icon="🔴"/>
             </Form.Dropdown>
         </Form>
     );
