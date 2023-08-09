@@ -36,12 +36,33 @@ export default function Command() {
               search(
                 query: "${form.state} is:pr author:${form.author} org:${form.organisation}", 
                 type: ISSUE, 
-                first: 20
+                first: 5
               ) {
                 issueCount
                 edges {
                   node {
                     ... on PullRequest {
+                      reviewRequests(first: 10) {
+                        edges {
+                          node {
+                            requestedReviewer {
+                              ... on User {
+                                login
+                              }
+                            }
+                          }
+                        }
+                      }
+                      reviews(first: 5) {
+                        edges {
+                          node {
+                            author {
+                              login
+                            }
+                            state
+                          }
+                        }
+                      }
                       number
                       title
                       url
@@ -130,18 +151,25 @@ export default function Command() {
                     );
                 }
 
+                const review = "JonathanLouw"
+                items = items.filter((item: any) => {
+                    return item.node.reviewRequests.edges.some((r: any) => r.node.requestedReviewer.login === review);
+                });
+
                 setSubmitted(true);
                 cacheForm(form);
             }
-        }).catch(_ => {
+        }).catch(err => {
             showToast({
                 style: Toast.Style.Failure,
                 title: "Failure with GitHub Request -> Check your details before submitting again",
+                message: err
             });
         });
     }
 
     if (submitted) {
+        //item.node.reviewRequests.edges[0].node.requestReviewer.login
         return PRList(items);
     }
 

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action, Detail } from "@raycast/api";
 
 export function PRList(data: [any]) {
 
@@ -6,12 +6,21 @@ export function PRList(data: [any]) {
         return `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`;
     }
 
+    function getReviewer(item: any) {
+        let str = ''
+        item.node.reviewRequests.edges.map((review: any) => {
+            str += review.node.requestedReviewer.login + ', '
+        })
+        str = str.slice(0, -2)
+        return str;
+    }
+
     return (
         <List isShowingDetail>
             {data.map((item) => (
                 <List.Item
                     title={item.node.title}
-                    key={item.node.number}
+                    key={item.node.title}
                     detail={
                         <List.Item.Detail
                             metadata={
@@ -25,6 +34,8 @@ export function PRList(data: [any]) {
                                     <List.Item.Detail.Metadata.Label title="Checks"/>
                                     <List.Item.Detail.Metadata.Label title="Conflicts" text={item.node.mergeable === "CONFLICTING" ? 'Conflicts with merging' : 'No Conflicts'}/>
                                     <List.Item.Detail.Metadata.Link title="URL" text="Link" target={item.node.url} />
+                                    <List.Item.Detail.Metadata.Separator />
+                                    <List.Item.Detail.Metadata.Label title="Title" text={getReviewer(item)} />
                                     <List.Item.Detail.Metadata.Separator />
                                 </List.Item.Detail.Metadata>
                             }
