@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "check-conflicting-prs",
-  "title": "Check Conflicting PRs",
-  "description": "",
+  "name": "check-prs",
+  "title": "Check PRs",
+  "description": "Check the status of your open PRs",
   "icon": "command-icon.png",
   "author": "SethSharp",
   "owner": "coding-labs",
