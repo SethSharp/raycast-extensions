@@ -32,7 +32,7 @@ export function PRList(data: [any]) {
                                     <List.Item.Detail.Metadata.Label title="Last Updated" text={convertDate(new Date(item.node.updatedAt))} />
                                     <List.Item.Detail.Metadata.Separator />
                                     <List.Item.Detail.Metadata.Label title="Checks"/>
-                                    <List.Item.Detail.Metadata.Label title="Conflicts" text={item.node.mergeable === "CONFLICTING" ? 'Conflicts with merging' : 'No Conflicts'}/>
+                                    <List.Item.Detail.Metadata.Label title="Conflicts" text={item.node.mergeable === "CONFLICTING" ?  "🔴" + ' Conflicts with merging' : "🟢" + ' No Conflicts'}/>
                                     <List.Item.Detail.Metadata.Link title="URL" text="Link" target={item.node.url} />
                                     <List.Item.Detail.Metadata.Separator />
                                     <List.Item.Detail.Metadata.Label title="Reviewer" text={getReviewer(item)} />
