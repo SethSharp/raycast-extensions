@@ -12,6 +12,7 @@ interface MyForm {
     state: string,
     conflicts: string,
     reviewer: string,
+    count: number,
 }
 
 export default function Command() {
@@ -23,11 +24,13 @@ export default function Command() {
         state: 'is:open',
         conflicts: '0',
         reviewer: '',
+        count: 0,
     }
 
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
+    const [countError, setCountError] = useState<string | undefined>();
 
     const [submitted, setSubmitted] = useState(false);
 
@@ -38,7 +41,7 @@ export default function Command() {
               search(
                 query: "${form.state} is:pr author:${form.author} org:${form.organisation}", 
                 type: ISSUE, 
-                first: 5
+                first: ${form.count}
               ) {
                 issueCount
                 edges {
@@ -96,6 +99,12 @@ export default function Command() {
         }
     }
 
+    function dropCountErrorIfNeeded() {
+        if (countError && countError.length > 0 ) {
+            setCountError(undefined);
+        }
+    }
+
     function dropOrganisationErrorIfNeeded() {
         if (organisationError && organisationError.length > 0) {
             setOrganisationError(undefined);
@@ -136,6 +145,11 @@ export default function Command() {
 
         if (form.token == '') {
             setTokenError('Token is required');
+            return;
+        }
+
+        if (isNaN(form.count)) {
+            setCountError('Count must be a number');
             return;
         }
 
@@ -234,6 +248,13 @@ export default function Command() {
                 id="reviewer"
                 placeholder="Select a reviewer"
                 defaultValue={myForm.reviewer}
+            />
+            <Form.TextField
+                id="count"
+                title="Number of Results"
+                error={countError}
+                defaultValue="10"
+                onChange={dropCountErrorIfNeeded}
             />
         </Form>
     );
