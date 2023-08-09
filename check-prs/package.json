@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "check-prs",
   "title": "Check PRs",
-  "description": "Check the status of your open PRs",
+  "description": "Use this tool to check the status of your PRs. Helpful for both reviewers. Credit to @Travis as well.",
   "icon": "command-icon.png",
   "author": "SethSharp",
   "owner": "coding-labs",
