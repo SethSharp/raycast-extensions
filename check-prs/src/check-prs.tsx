@@ -1,6 +1,6 @@
 import { PRList } from "./Components/pr-list";
 import { ActionPanel, Form, Action, Cache, showToast, Toast } from "@raycast/api";
-import {useState} from "react";
+import { useState } from "react";
 import axios from "axios";
 
 let items:any;
@@ -9,6 +9,9 @@ interface MyForm {
     author: string,
     organisation: string,
     token: string,
+    state: string,
+    conflicts: string,
+    reviewer: string,
 }
 
 export default function Command() {
@@ -16,34 +19,64 @@ export default function Command() {
     const myForm: MyForm = {
         author: '',
         organisation: '',
-        token: ''
+        token: '',
+        state: 'is:open',
+        conflicts: '0',
+        reviewer: '',
     }
 
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
+
     const [submitted, setSubmitted] = useState(false);
 
     async function makeGraphQlRequest(form: MyForm) {
 
-        const query = `{
-                      search(query: "is:open is:pr author:${form.author} org:${form.organisation}", type: ISSUE, first: 100) {
-                        issueCount
+        const query =
+            `{
+              search(
+                query: "${form.state} is:pr author:${form.author} org:${form.organisation}", 
+                type: ISSUE, 
+                first: 5
+              ) {
+                issueCount
+                edges {
+                  node {
+                    ... on PullRequest {
+                      reviewRequests(first: 10) {
                         edges {
                           node {
-                            ... on PullRequest {
-                              number
-                              title
-                              url
-                              mergeable
-                              state
-                              createdAt
-                              updatedAt
+                            requestedReviewer {
+                              ... on User {
+                                login
+                              }
                             }
                           }
                         }
                       }
-                    }`;
+                      reviews(first: 5) {
+                        edges {
+                          node {
+                            author {
+                              login
+                            }
+                            state
+                          }
+                        }
+                      }
+                      number
+                      title
+                      url
+                      mergeable
+                      state
+                      createdAt
+                      updatedAt
+                    }
+                  }
+                }
+              }
+            }`;
 
         return await axios.post(
             'https://api.github.com/graphql',
@@ -76,7 +109,7 @@ export default function Command() {
     }
 
     function cacheForm(form: MyForm) {
-        new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token }]));
+        new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token, reviewer: form.reviewer }]));
     }
 
     function checkFormCache() {
@@ -109,13 +142,31 @@ export default function Command() {
         makeGraphQlRequest(form).then(res => {
             if (res) {
                 items = res.data.data.search.edges;
+
+                if (form.conflicts == '1') {
+                    items = items.filter(
+                        (pr: any) => pr.node.mergeable === 'MERGEABLE'
+                    );
+                } else if (form.conflicts == '2') {
+                    items = items.filter(
+                        (pr: any) => pr.node.mergeable === 'CONFLICTING'
+                    );
+                }
+
+                if (form.reviewer) {
+                    items = items.filter((item: any) => {
+                        return item.node.reviewRequests.edges.some((r: any) => r.node.requestedReviewer.login === form.reviewer);
+                    });
+                }
+
                 setSubmitted(true);
                 cacheForm(form);
             }
-        }).catch(_ => {
+        }).catch(err => {
             showToast({
                 style: Toast.Style.Failure,
                 title: "Failure with GitHub Request -> Check your details before submitting again",
+                message: err
             });
         });
     }
@@ -131,7 +182,7 @@ export default function Command() {
         <Form
             actions={
                 <ActionPanel>
-                    <Action.SubmitForm title="Submit Answer" onSubmit={submitForm} />
+                    <Action.SubmitForm title="Submit Answer" onSubmit={(values: MyForm) => submitForm(values)} />
                 </ActionPanel>
             }
         >
@@ -159,6 +210,30 @@ export default function Command() {
             <Form.Description
                 title="Creating your GitHub Token"
                 text="Generate a token in GitHub with the repo scope option selected, name being one you will remember and a expiration date you are comfortable with"
+            />
+            <Form.Dropdown
+                id="state"
+                title="Choose State of PR"
+                defaultValue={myForm.state}
+            >
+                <Form.DropdownItem value="" title="All PRs" icon="⚪️"/>
+                <Form.DropdownItem value="is:open" title="Open PRs" icon="🟢"/>
+                <Form.DropdownItem value="is:merged" title="Merged PRs" icon="🟣"/>
+                <Form.DropdownItem value="is:closed" title="Closed PRs" icon="🔴"/>
+            </Form.Dropdown>
+            <Form.Dropdown
+                id="conflicts"
+                title="Has conflicts"
+                defaultValue={myForm.conflicts}
+            >
+                <Form.DropdownItem value="0" title="All PRs" icon="⚪️"/>
+                <Form.DropdownItem value="1" title="Non Conflicting" icon="🟢"/>
+                <Form.DropdownItem value="2" title="Conflicting" icon="🔴"/>
+            </Form.Dropdown>
+            <Form.TextField
+                id="reviewer"
+                placeholder="Select a reviewer"
+                defaultValue={myForm.reviewer}
             />
         </Form>
     );
