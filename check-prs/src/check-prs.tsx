@@ -9,6 +9,7 @@ interface MyForm {
     author: string,
     organisation: string,
     token: string,
+    state: string,
 }
 
 export default function Command() {
@@ -16,34 +17,41 @@ export default function Command() {
     const myForm: MyForm = {
         author: '',
         organisation: '',
-        token: ''
+        token: '',
+        state: ''
     }
 
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
+
     const [submitted, setSubmitted] = useState(false);
 
     async function makeGraphQlRequest(form: MyForm) {
 
-        const query = `{
-                      search(query: "is:open is:pr author:${form.author} org:${form.organisation}", type: ISSUE, first: 100) {
-                        issueCount
-                        edges {
-                          node {
-                            ... on PullRequest {
-                              number
-                              title
-                              url
-                              mergeable
-                              state
-                              createdAt
-                              updatedAt
-                            }
-                          }
-                        }
-                      }
-                    }`;
+        const query =
+            `{
+              search(
+                query: "${form.state} is:pr author:${form.author} org:${form.organisation}", 
+                type: ISSUE, 
+                first: 100
+              ) {
+                issueCount
+                edges {
+                  node {
+                    ... on PullRequest {
+                      number
+                      title
+                      url
+                      mergeable
+                      state
+                      createdAt
+                      updatedAt
+                    }
+                  }
+                }
+              }
+            }`;
 
         return await axios.post(
             'https://api.github.com/graphql',
@@ -160,6 +168,16 @@ export default function Command() {
                 title="Creating your GitHub Token"
                 text="Generate a token in GitHub with the repo scope option selected, name being one you will remember and a expiration date you are comfortable with"
             />
+            <Form.Dropdown
+                id="state"
+                title="Choose State of PR"
+                defaultValue={myForm.state}
+            >
+                <Form.DropdownItem value="" title="All PRs" icon="⚪️"/>
+                <Form.DropdownItem value="is:open" title="Open PRs" icon="🟢"/>
+                <Form.DropdownItem value="is:merged" title="Merged PRs" icon="🟣"/>
+                <Form.DropdownItem value="is:closed" title="Closed PRs" icon="🔴"/>
+            </Form.Dropdown>
         </Form>
     );
 }
