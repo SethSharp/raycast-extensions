@@ -2,11 +2,8 @@ import { List, ActionPanel, Action } from "@raycast/api";
 
 export function PRList(data: [any]) {
 
-    function convertDate(date: string) {
-
-        const dateObj = new Date(date);
-
-        return `${dateObj.getDate()}/${dateObj.getMonth()+1}/${dateObj.getFullYear()}`;
+    function convertDate(date: Date) {
+        return `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`;
     }
 
     return (
@@ -21,8 +18,8 @@ export function PRList(data: [any]) {
                                 <List.Item.Detail.Metadata>
                                     <List.Item.Detail.Metadata.Label title="Basic Information" />
                                     <List.Item.Detail.Metadata.Label title="Title" text={item.node.title} />
-                                    <List.Item.Detail.Metadata.Label title="Created" text={convertDate(item.node.createdAt)} />
-                                    <List.Item.Detail.Metadata.Label title="Last Updated" text={convertDate(item.node.updatedAt)} />
+                                    <List.Item.Detail.Metadata.Label title="Created" text={convertDate(new Date(item.node.createdAt))} />
+                                    <List.Item.Detail.Metadata.Label title="Last Updated" text={convertDate(new Date(item.node.updatedAt))} />
                                     <List.Item.Detail.Metadata.Separator />
                                     <List.Item.Detail.Metadata.Label title="Checks"/>
                                     <List.Item.Detail.Metadata.Label title="Conflicts" text={item.node.mergeable === "CONFLICTING" ? 'Conflicts with merging' : 'No Conflicts'}/>

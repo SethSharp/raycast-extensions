@@ -11,10 +11,6 @@ interface MyForm {
     token: string,
 }
 
-function cacheForm(form: MyForm) {
-    new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token }]));
-}
-
 export default function Command() {
 
     const myForm: MyForm = {
@@ -23,20 +19,9 @@ export default function Command() {
         token: ''
     }
 
-    const cached = new Cache().get("form");
-
-    if (cached) {
-
-        const data = JSON.parse(cached)[0];
-        myForm.author = data.author
-        myForm.organisation = data.organisation
-        myForm.token = data.token
-    }
-
     const [authorError, setAuthorError] = useState<string | undefined>();
     const [organisationError, setOrganisationError] = useState<string | undefined>();
     const [tokenError, setTokenError] = useState<string | undefined>();
-
     const [submitted, setSubmitted] = useState(false);
 
     async function makeGraphQlRequest(form: MyForm) {
@@ -60,30 +45,16 @@ export default function Command() {
                       }
                     }`;
 
-        try {
-
-            await axios.post(
-                'https://api.github.com/graphql',
-                { query },
-                {
-                    headers: {
-                        Authorization: `Bearer ${form.token}`,
-                        'Content-Type': 'application/json',
-                    },
-                }
-            ).then(res => {
-                items = res.data.data.search.edges;
-                setSubmitted(true);
-                cacheForm(form);
-            });
-        } catch (error: Error) {
-
-            showToast({
-                style: Toast.Style.Failure,
-                title: "Failure with GitHub Request -> Check your details before submitting again",
-                message: error.message,
-            });
-        }
+        return await axios.post(
+            'https://api.github.com/graphql',
+            { query },
+            {
+                headers: {
+                    Authorization: `Bearer ${form.token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
     }
 
     function dropAuthorErrorIfNeeded() {
@@ -104,8 +75,22 @@ export default function Command() {
         }
     }
 
+    function cacheForm(form: MyForm) {
+        new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token }]));
+    }
+
+    function checkFormCache() {
+        const cached = new Cache().get("form");
+        if (cached) {
+            const data = JSON.parse(cached)[0];
+            myForm.author = data.author
+            myForm.organisation = data.organisation
+            myForm.token = data.token
+        }
+    }
+
     function submitForm(form: MyForm) {
-        // make request
+
         if (form.author == '') {
             setAuthorError('Name is required');
             return;
@@ -121,12 +106,27 @@ export default function Command() {
             return;
         }
 
-        makeGraphQlRequest(form);
+        makeGraphQlRequest(form).then(res => {
+            if (res) {
+                items = res.data.data.search.edges;
+                setSubmitted(true);
+                cacheForm(form);
+            }
+        }).catch(err => {
+            showToast({
+                style: Toast.Style.Failure,
+                title: "Failure with GitHub Request -> Check your details before submitting again",
+                message: err,
+            });
+        });
     }
 
     if (submitted) {
         return PRList(items);
     }
+
+    // OnMounted/render
+    checkFormCache()
 
     return (
         <Form
