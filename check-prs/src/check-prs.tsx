@@ -1,6 +1,6 @@
 import { PRList } from "./Components/pr-list";
 import { ActionPanel, Form, Action, Cache, showToast, Toast } from "@raycast/api";
-import {useState} from "react";
+import { useState } from "react";
 import axios from "axios";
 
 let items:any;
@@ -10,7 +10,8 @@ interface MyForm {
     organisation: string,
     token: string,
     state: string,
-    conflicts: string
+    conflicts: string,
+    reviewer: string,
 }
 
 export default function Command() {
@@ -21,6 +22,7 @@ export default function Command() {
         token: '',
         state: 'is:open',
         conflicts: '0',
+        reviewer: '',
     }
 
     const [authorError, setAuthorError] = useState<string | undefined>();
@@ -107,7 +109,7 @@ export default function Command() {
     }
 
     function cacheForm(form: MyForm) {
-        new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token }]));
+        new Cache().set("form", JSON.stringify([{ author: form.author, organisation: form.organisation, token: form.token, reviewer: form.reviewer }]));
     }
 
     function checkFormCache() {
@@ -151,10 +153,11 @@ export default function Command() {
                     );
                 }
 
-                const review = "JonathanLouw"
-                items = items.filter((item: any) => {
-                    return item.node.reviewRequests.edges.some((r: any) => r.node.requestedReviewer.login === review);
-                });
+                if (form.reviewer) {
+                    items = items.filter((item: any) => {
+                        return item.node.reviewRequests.edges.some((r: any) => r.node.requestedReviewer.login === form.reviewer);
+                    });
+                }
 
                 setSubmitted(true);
                 cacheForm(form);
@@ -169,7 +172,6 @@ export default function Command() {
     }
 
     if (submitted) {
-        //item.node.reviewRequests.edges[0].node.requestReviewer.login
         return PRList(items);
     }
 
@@ -180,7 +182,7 @@ export default function Command() {
         <Form
             actions={
                 <ActionPanel>
-                    <Action.SubmitForm title="Submit Answer" onSubmit={submitForm} />
+                    <Action.SubmitForm title="Submit Answer" onSubmit={(values: MyForm) => submitForm(values)} />
                 </ActionPanel>
             }
         >
@@ -228,6 +230,11 @@ export default function Command() {
                 <Form.DropdownItem value="1" title="Non Conflicting" icon="🟢"/>
                 <Form.DropdownItem value="2" title="Conflicting" icon="🔴"/>
             </Form.Dropdown>
+            <Form.TextField
+                id="reviewer"
+                placeholder="Select a reviewer"
+                defaultValue={myForm.reviewer}
+            />
         </Form>
     );
 }

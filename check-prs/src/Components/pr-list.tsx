@@ -35,7 +35,7 @@ export function PRList(data: [any]) {
                                     <List.Item.Detail.Metadata.Label title="Conflicts" text={item.node.mergeable === "CONFLICTING" ? 'Conflicts with merging' : 'No Conflicts'}/>
                                     <List.Item.Detail.Metadata.Link title="URL" text="Link" target={item.node.url} />
                                     <List.Item.Detail.Metadata.Separator />
-                                    <List.Item.Detail.Metadata.Label title="Title" text={getReviewer(item)} />
+                                    <List.Item.Detail.Metadata.Label title="Reviewer" text={getReviewer(item)} />
                                     <List.Item.Detail.Metadata.Separator />
                                 </List.Item.Detail.Metadata>
                             }
