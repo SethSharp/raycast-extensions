@@ -1,4 +1,4 @@
-import {PRList} from "./Components/pr-list";
+import { PRList } from "./Components/pr-list";
 import { ActionPanel, Form, Action, Cache, showToast, Toast } from "@raycast/api";
 import {useState} from "react";
 import axios from "axios";
@@ -112,11 +112,10 @@ export default function Command() {
                 setSubmitted(true);
                 cacheForm(form);
             }
-        }).catch(err => {
+        }).catch(_ => {
             showToast({
                 style: Toast.Style.Failure,
                 title: "Failure with GitHub Request -> Check your details before submitting again",
-                message: err,
             });
         });
     }
@@ -138,21 +137,28 @@ export default function Command() {
         >
             <Form.TextField
                 id="author"
+                placeholder='GitHub Username'
                 defaultValue={myForm.author}
                 error={authorError}
                 onChange={dropAuthorErrorIfNeeded}
             />
             <Form.TextField
                 id="organisation"
+                placeholder="Organisation name"
                 defaultValue={myForm.organisation}
                 error={organisationError}
                 onChange={dropOrganisationErrorIfNeeded}
             />
             <Form.TextField
                 id="token"
+                placeholder="GitHub API token"
                 defaultValue={myForm.token}
                 error={tokenError}
                 onChange={dropTokenErrorIfNeeded}
+            />
+            <Form.Description
+                title="Creating your GitHub Token"
+                text="Generate a token in GitHub with the repo scope option selected, name being one you will remember and a expiration date you are comfortable with"
             />
         </Form>
     );
