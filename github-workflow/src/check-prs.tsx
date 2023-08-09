@@ -80,7 +80,7 @@ export default function Command() {
     }
 
     function checkFormCache() {
-        let cached = new Cache().get("form");
+        const cached = new Cache().get("form");
         if (cached) {
             const data = JSON.parse(cached)[0];
             myForm.author = data.author
