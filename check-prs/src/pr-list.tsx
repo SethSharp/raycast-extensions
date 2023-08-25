@@ -8,11 +8,16 @@ export function PRList(data: [any]) {
 
     function getReviewer(item: any) {
         let str = ''
+
         item.node.reviewRequests.edges.map((review: any) => {
             str += review.node.requestedReviewer.login + ', '
         })
-        str = str.slice(0, -2)
-        return str;
+
+        if (str == '') {
+            return 'No Reviewer Selected'
+        }
+
+        return str.slice(0, -2)
     }
 
     return (
