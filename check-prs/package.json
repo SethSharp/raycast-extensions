@@ -8,7 +8,8 @@
   "owner": "coding-labs",
   "license": "MIT",
   "contributors": [
-    "TJeffery"
+    "TJeffery",
+    "SethSharp"
   ],
   "commands": [
     {

@@ -1,4 +1,4 @@
-import { PRList } from "./Components/pr-list";
+import { PRList } from "./pr-list";
 import { ActionPanel, Form, Action, Cache, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import axios from "axios";
@@ -190,18 +190,15 @@ export default function Command() {
             }
         >
             <Form.TextField
-                id="author"
-                placeholder='GitHub Username'
-                defaultValue={myForm.author}
-                error={authorError}
-                onChange={dropAuthorErrorIfNeeded}
-            />
-            <Form.TextField
                 id="organisation"
-                placeholder="Organisation name"
+                placeholder="Get the PRs from this organisation"
                 defaultValue={myForm.organisation}
                 error={organisationError}
                 onChange={dropOrganisationErrorIfNeeded}
+            />
+            <Form.Description
+                title="Creating your GitHub Token"
+                text="Generate a token in GitHub with the repo scope option selected, name being one you will remember and a expiration date you are comfortable with"
             />
             <Form.TextField
                 id="token"
@@ -210,13 +207,17 @@ export default function Command() {
                 error={tokenError}
                 onChange={dropTokenErrorIfNeeded}
             />
-            <Form.Description
-                title="Creating your GitHub Token"
-                text="Generate a token in GitHub with the repo scope option selected, name being one you will remember and a expiration date you are comfortable with"
+            <Form.TextField
+                id="author"
+                title="Data of"
+                placeholder='Username'
+                defaultValue={myForm.author}
+                error={authorError}
+                onChange={dropAuthorErrorIfNeeded}
             />
             <Form.Dropdown
                 id="state"
-                title="Choose State of PR"
+                title="State of PR?"
                 defaultValue={myForm.state}
             >
                 <Form.DropdownItem value="" title="All PRs" icon="⚪️"/>
@@ -226,13 +227,17 @@ export default function Command() {
             </Form.Dropdown>
             <Form.Dropdown
                 id="conflicts"
-                title="Has conflicts"
+                title="Has conflicts?"
                 defaultValue={myForm.conflicts}
             >
                 <Form.DropdownItem value="0" title="All PRs" icon="⚪️"/>
                 <Form.DropdownItem value="1" title="Non Conflicting" icon="🟢"/>
                 <Form.DropdownItem value="2" title="Conflicting" icon="🔴"/>
             </Form.Dropdown>
+            <Form.Description
+                title="Selecting the reviewer"
+                text="This is helpful for those that are responsible for code reviews, enter in the user of the person you review for in the above field and enter in your name here."
+            />
             <Form.TextField
                 id="reviewer"
                 placeholder="Select a reviewer"
@@ -242,7 +247,7 @@ export default function Command() {
                 id="count"
                 title="Number of Results"
                 error={countError}
-                defaultValue="10"
+                defaultValue="15"
                 onChange={dropCountErrorIfNeeded}
             />
         </Form>

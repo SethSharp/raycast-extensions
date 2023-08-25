@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Detail } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 
 export function PRList(data: [any]) {
 
