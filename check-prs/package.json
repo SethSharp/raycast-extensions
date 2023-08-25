@@ -1,16 +1,19 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "check-prs",
-  "title": "Check PRs",
-  "description": "Use this tool to check the status of your PRs. Helpful for both reviewers. Credit to @Travis as well.",
+  "title": "Coding Labs | Github API Tool",
+  "description": "This is a tool you can use to easily view and access information from GitHub, more specifically the PRs you have. Whether they are open or closed you can view them and inspect important properties such as; whether there are conflicts with main or the selected reviewer.",
   "icon": "command-icon.png",
   "author": "SethSharp",
   "owner": "coding-labs",
   "license": "MIT",
+  "contributors": [
+    "TJeffery"
+  ],
   "commands": [
     {
       "name": "check-prs",
-      "title": "check prs",
+      "title": "Check Pull Requests",
       "description": "",
       "mode": "view"
     }

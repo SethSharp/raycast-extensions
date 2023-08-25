@@ -35,7 +35,6 @@ export default function Command() {
     const [submitted, setSubmitted] = useState(false);
 
     async function makeGraphQlRequest(form: MyForm) {
-
         const query =
             `{
               search(
@@ -55,16 +54,6 @@ export default function Command() {
                                 login
                               }
                             }
-                          }
-                        }
-                      }
-                      reviews(first: 5) {
-                        edges {
-                          node {
-                            author {
-                              login
-                            }
-                            state
                           }
                         }
                       }
